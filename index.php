@@ -42,6 +42,19 @@ $app->get('/alunni/{nome}', function (Request $request, Response $response, $arg
     return $response;
 });
 
+$app->get('/alluni_json', function (Request $request, Response $response, $args) use ($classe) {
+    $alunni = [];
+    foreach ($classe->getAlunni() as $alunno) {
+        $alunni[] = [
+            "nome" => $alunno->getNome(),
+            "cognome" => $alunno->getCognome(),
+            "eta" => $alunno->getEta()
+        ];
+    }
+    $response = $response->withHeader('Content-type', 'application/json');
+    $response->getBody()->write(json_encode($alunni));
+    return $response;
+});
 
 
 $app->run();
