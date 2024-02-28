@@ -1,11 +1,23 @@
 <?php
+
+use controllers\AlunniController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/vendor/autoload.php';
 
-require_once "Classe.php";
+spl_autoload_register('psr4_autoloader');
+
+function psr4_autoloader($class) {
+    $class_path = str_replace('\\', '/', $class);
+
+    $file =  __DIR__ . '/' . $class_path . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+}
 
 $app = AppFactory::create();
 
@@ -14,47 +26,10 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-
-$classe = new Classe();
-$alunno1 = new Alunno("mario", "rossi", "20");
-$alunno2 = new Alunno("luca", "bianchi", "21");
-$alunno3 = new Alunno("paolo", "verdi", "22");
-$classe->addAlunno($alunno1);
-$classe->addAlunno($alunno2);
-$classe->addAlunno($alunno3);
-
-$app->get('/alunni', function (Request $request, Response $response, $args) use ($classe) {
-    foreach ($classe->getAlunni() as $alunno) {
-        $response->getBody()->write($alunno->getNome());
-    }
-
-    return $response;
-});
-
-$app->get('/alunni/{nome}', function (Request $request, Response $response, $args) use ($classe) {
-    $nome = $args['nome'];
-    $alunno = $classe->getAlunnoByNome($nome);
-    if ($alunno === null) {
-        $response->getBody()->write("Alunno non presente");
-    } else {
-        $response->getBody()->write($alunno->getNome() . " " . $alunno->getCognome() . " " . $alunno->getEta());
-    }
-    return $response;
-});
-
-$app->get('/alluni_json', function (Request $request, Response $response, $args) use ($classe) {
-    $alunni = [];
-    foreach ($classe->getAlunni() as $alunno) {
-        $alunni[] = [
-            "nome" => $alunno->getNome(),
-            "cognome" => $alunno->getCognome(),
-            "eta" => $alunno->getEta()
-        ];
-    }
-    $response = $response->withHeader('Content-type', 'application/json');
-    $response->getBody()->write(json_encode($alunni));
-    return $response;
-});
+// Alunni
+$app->get('/alunni', AlunniController::class . ':index');
+$app->get('/alunni/{nome}', AlunniController::class . ':byName');
+$app->get('/alunni_json', AlunniController::class . ':asJson');
 
 
 $app->run();

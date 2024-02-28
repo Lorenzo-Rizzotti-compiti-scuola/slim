@@ -1,5 +1,6 @@
 <?php
 
+namespace models;
 class Alunno
 {
     private string $nome;

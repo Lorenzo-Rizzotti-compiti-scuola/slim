@@ -1,6 +1,6 @@
 <?php
 
-require_once "Alunno.php";
+namespace models;
 
 class Classe
 {
